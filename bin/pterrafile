@@ -1,2 +1,2 @@
 #!/bin/sh
-python -m terrafile "$@"
+python3 -m terrafile "$@"

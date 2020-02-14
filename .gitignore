@@ -2,3 +2,5 @@
 build/
 dist/
 terrafile.egg-info/
+env/
+venv/

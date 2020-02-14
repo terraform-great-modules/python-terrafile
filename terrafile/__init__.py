@@ -1,16 +1,19 @@
+"""Locally download all modules"""
 import os
 import re
-import requests
 import shutil
 import subprocess
 import sys
+import requests
 import yaml
+from .patch import Patch
+from . import repository
 
 
 REGISTRY_BASE_URL = 'https://registry.terraform.io/v1/modules'
 GITHUB_DOWNLOAD_URL_RE = re.compile('https://[^/]+/repos/([^/]+)/([^/]+)/tarball/([^/]+)/.*')
 
-
+# pylint: disable=missing-function-docstring
 def get_source_from_registry(source, version):
     namespace, name, provider = source.split('/')
     registry_download_url = '{base_url}/{namespace}/{name}/{provider}/{version}/download'.format(
@@ -32,8 +35,8 @@ def get_source_from_registry(source, version):
     sys.exit(1)
 
 
-def add_github_token(github_download_url,token):
-    github_repo_url_pattern = re.compile('.*github.com/(.*)/(.*)\.git')
+def add_github_token(github_download_url, token):
+    github_repo_url_pattern = re.compile('.*github.com/(.*)/(.*)\.git')  # pylint: disable=anomalous-backslash-in-string
     match = github_repo_url_pattern.match(github_download_url)
     url = github_download_url
     if match:
@@ -44,15 +47,14 @@ def add_github_token(github_download_url,token):
 
 def run(*args, **kwargs):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kwargs)
-    stdout, stderr = proc.communicate()
+    stdout, stderr = proc.communicate()  # pylint: disable=unused-variable
     return (stdout, proc.returncode)
 
 
 def get_terrafile_path(path):
     if os.path.isdir(path):
         return os.path.join(path, 'Terrafile')
-    else:
-        return path
+    return path
 
 
 def read_terrafile(path):
@@ -81,13 +83,13 @@ def has_git_tag(path, tag):
 
 
 def is_valid_registry_source(source):
+    # pylint: disable=duplicate-string-formatting-argument,line-too-long
     name_sub_regex = '[0-9A-Za-z](?:[0-9A-Za-z-_]{0,62}[0-9A-Za-z])?'
     provider_sub_regex = '[0-9a-z]{1,64}'
     registry_regex = re.compile('^({})\\/({})\\/({})(?:\\/\\/(.*))?$'.format(name_sub_regex, name_sub_regex, provider_sub_regex))
     if registry_regex.match(source):
         return True
-    else:
-        return False
+    return False
 
 
 def update_modules(path):
@@ -127,10 +129,17 @@ def update_modules(path):
         # add token to tthe source url if exists
         if 'GITHUB_TOKEN' in os.environ:
             source = add_github_token(source, os.getenv('GITHUB_TOKEN'))
+        quilt = Patch(target)
+        repo = repository.Repo(path=target, origin=source, version=version)
         # Delete the old directory and clone it from scratch.
         print('Fetching {}/{}'.format(module_path_name, name))
         shutil.rmtree(target, ignore_errors=True)
-        output, returncode = run('git', 'clone', '--branch={}'.format(version), source, target)
+        output, returncode = repo.clone()
         if returncode != 0:
             sys.stderr.write(bytes.decode(output))
             sys.exit(returncode)
+        patches = repository_details.get("patches", list())
+        if patches:
+            for i, patch in enumerate(repository_details.get("patches", list())):
+                quilt.import_patch(name=f'patch_{i}.patch', content=patch)
+            quilt.push_all()
