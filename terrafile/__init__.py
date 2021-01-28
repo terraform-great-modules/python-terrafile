@@ -142,4 +142,6 @@ def update_modules(path):
         if patches:
             for i, patch in enumerate(repository_details.get("patches", list())):
                 quilt.import_patch(name=f'patch_{i}.patch', content=patch)
-            quilt.push_all()
+            status = quilt.push_all()
+            is status != 0:
+                raise SystemError("Error to push patches")

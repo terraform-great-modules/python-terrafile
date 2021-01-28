@@ -1,6 +1,6 @@
-$(eval NAME := $(shell python setup.py --name))
-$(eval PY_NAME := $(shell python setup.py --name | sed 's/-/_/g'))
-$(eval VERSION := $(shell python setup.py --version))
+$(eval NAME := $(shell python3 setup.py --name))
+$(eval PY_NAME := $(shell python3 setup.py --name | sed 's/-/_/g'))
+$(eval VERSION := $(shell python3 setup.py --version))
 
 SDIST := dist/$(NAME)-$(VERSION).tar.gz
 WHEEL := dist/$(PY_NAME)-$(VERSION)-py2.py3-none-any.whl
@@ -9,10 +9,10 @@ WHEEL := dist/$(PY_NAME)-$(VERSION)-py2.py3-none-any.whl
 all: build
 
 $(SDIST):
-	python setup.py sdist
+	python3 setup.py sdist
 
 $(WHEEL):
-	python setup.py bdist_wheel
+	python3 setup.py bdist_wheel
 
 .PHONY: build
 build: $(SDIST) $(WHEEL)

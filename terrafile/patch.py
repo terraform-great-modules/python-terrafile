@@ -44,14 +44,23 @@ class Patch:
 
     def import_patch(self, name='patch', file_path=None, content=None):
         """Import the patch from a filepath, or from content"""
+        cmd = ['quilt', 'import', '-P', name]
+        if file_path and content:
+            raise ValueError("Provide only a file_path or a content")
         if file_path:
-            self.run('quilt', 'import', f'-P {name}', file_path)
-        else:
+            cmd.append(file_path)
+            stdout, status = self.run(*cmd)
+        elif content:
             with NamedTemporaryFile() as tmp:
                 tmp.write(content.encode())
                 tmp.write('\n'.encode())
                 tmp.flush()
-                self.run('quilt', 'import', f'-P {name}', tmp.name)
+                cmd.append(tmp.name)
+                stdout, status = self.run(*cmd)
+        if status != 0:
+            print("Error to apply path!")
+            print(f"Error message: {stdout}")
+            raise SystemError("Error running quilt")
 
     def diff_patch(self, from_local, file_path=None, content=None):
         """Diff of local with remote patch"""
