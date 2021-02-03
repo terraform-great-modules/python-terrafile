@@ -3,6 +3,7 @@ import os
 import subprocess
 
 def run(*args, **kwargs):
+    """Just a wrapper to subprocess"""
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **kwargs)
     stdout, stderr = proc.communicate()  # pylint: disable=unused-variable
     return (stdout, proc.returncode)
@@ -20,14 +21,17 @@ class Repo:
         """Parent folder is required for cloning!"""
         if not os.path.isdir(os.path.dirname(self.path)):
             os.mkdir(os.path.dirname(self.path))
+
     @property
     def path(self):
         """Local filesystem path"""
         return self._path
+
     @property
     def version(self):
         """Version to locally download"""
         return self._version
+
     @property
     def origin(self):
         """Upstream code source"""
@@ -42,6 +46,7 @@ class Repo:
             else:
                 raise SystemError("No upstream repository is set")
         return self._origin
+
     @property
     def is_shallow(self):
         """Check if the repository is shallow (limited action)"""

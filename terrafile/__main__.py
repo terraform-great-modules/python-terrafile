@@ -2,11 +2,11 @@
 import os
 import sys
 
-from terrafile import update_modules
+from terrafile import main
 
 if len(sys.argv) > 1:
     path = sys.argv[1]
 else:
     path = os.getcwd()
 
-update_modules(path)
+main(path)

@@ -4,9 +4,9 @@ from setuptools import setup
 
 setup(
     name='terrafile',
-    version='0.3.3',
+    version='0.4.0',
     description='Manages external Terraform modules.',
-    author='Raymond Butcher',
+    author='Riccardo Scartozzi Raymond Butcher',
     author_email='ray.butcher@claranet.uk',
     url='https://github.com/claranet/python-terrafile',
     license='MIT License',
@@ -19,6 +19,5 @@ setup(
     install_requires=(
         'pyyaml',
         'requests',
-        'python-quilt',
     ),
 )
