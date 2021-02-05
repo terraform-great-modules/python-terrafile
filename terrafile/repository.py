@@ -1,5 +1,5 @@
 """Repository wrapper"""
-import os
+from pathlib import Path
 import subprocess
 
 def run(*args, **kwargs):
@@ -12,15 +12,15 @@ class Repo:
     """Abstract reporitory commands"""
 
     def __init__(self, path=None, origin=None, version=None):
-        self._path = path
+        self._path = Path(path)
         self._origin = origin
         self._version = version
         self._uptodate = False
 
     def mkparentpath(self):
         """Parent folder is required for cloning!"""
-        if not os.path.isdir(os.path.dirname(self.path)):
-            os.mkdir(os.path.dirname(self.path))
+        if not self.path.parent.is_dir():
+            self.path.mkdir(exist_ok=True)
 
     @property
     def path(self):
@@ -50,7 +50,7 @@ class Repo:
     @property
     def is_shallow(self):
         """Check if the repository is shallow (limited action)"""
-        return os.path.isfile(os.path.join(self.path, ".git/shallow"))
+        return (self.path / ".git/shallow").is_file()
 
     def run(self, *args, **kwargs):
         """Run command into path"""
@@ -64,7 +64,7 @@ class Repo:
             self.path = self.origin.split("/")[-1]
             if self.path.endswith(".git"):
                 self.path = self.path[:-4]
-        if os.path.isdir(self.path):
+        if self.path.is_dir():
             raise SystemError(f"Path {self.path} already exists, please delete it first")
         self.mkparentpath()
         if shallow:
@@ -72,7 +72,7 @@ class Repo:
                           '--single-branch', self.origin, self.path]
         else:
             clone_args = ['git', 'clone', f'--branch={self.version}', self.origin, self.path]
-        output, returncode = run(*clone_args, cwd=os.path.dirname(self.path))
+        output, returncode = run(*clone_args, cwd=self.path.parent)
         self._uptodate = True
         return output, returncode
 
