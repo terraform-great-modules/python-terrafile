@@ -19,8 +19,9 @@ class Repo:
 
     def mkparentpath(self):
         """Parent folder is required for cloning!"""
-        if not self.path.parent.is_dir():
-            self.path.mkdir(exist_ok=True)
+        parent = self.path.parent
+        if not parent.is_dir():
+            parent.mkdir(parents=True, exist_ok=True)
 
     @property
     def path(self):
