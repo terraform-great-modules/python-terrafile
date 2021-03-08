@@ -2,13 +2,15 @@
 import os
 import subprocess
 from tempfile import NamedTemporaryFile
+from pathlib import Path
 
 
 class Patch:
     """Quilt interface"""
 
-    def __init__(self, path):
+    def __init__(self, path, root=None):
         self.path = path
+        self.root = root
         self._is_init = False
 
     def run(self, *args, **kwargs):
@@ -48,6 +50,9 @@ class Patch:
         if file_path and content:
             raise ValueError("Provide only a file_path or a content")
         if file_path:
+            file_path = Path(self.root) / file_path
+            if not file_path.exists():
+                raise ValueError(f"Not found patch file {file_path}")
             cmd.append(file_path)
             stdout, status = self.run(*cmd)
         elif content:
@@ -57,6 +62,8 @@ class Patch:
                 tmp.flush()
                 cmd.append(tmp.name)
                 stdout, status = self.run(*cmd)
+        else:
+            raise ValueError("A file_path or a content is required")
         if status != 0:
             print("Error to apply path!")
             print(f"Error message: {stdout}")

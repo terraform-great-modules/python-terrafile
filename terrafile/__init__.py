@@ -197,10 +197,13 @@ def update_module(cwd, name, conf):
     if returncode != 0:
         sys.stderr.write(bytes.decode(output))
         sys.exit(returncode)
-    if conf.get("patches"):
-        quilt = Patch(target)
+    if conf.get("patches") or conf.get("patches_file"):
+        quilt = Patch(target, root=cwd)
+        i = 0
         for i, patch in enumerate(conf.get("patches", list())):
             quilt.import_patch(name=f'patch_{i}.patch', content=patch)
+        for i, patch in enumerate(conf.get("patches_file", list()), start=i+1):
+            quilt.import_patch(name=f'patch_{i}.patch', file_path=patch)
         status = quilt.push_all()
         if status != 0:
             raise SystemError("Error to push patches")
