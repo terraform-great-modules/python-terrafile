@@ -21,6 +21,10 @@ build: $(SDIST) $(WHEEL)
 install: $(WHEEL)
 	pip install --user $(WHEEL)
 
+.PHONY: systeminstall
+systeminstall: $(WHEEL)
+	pip install $(WHEEL)
+
 .PHONY: uninstall
 uninstall:
 	pip uninstall $(NAME)
