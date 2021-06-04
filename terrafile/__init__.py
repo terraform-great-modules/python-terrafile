@@ -212,4 +212,7 @@ def update_module(cwd, name, conf):
 def main(path=None):
     """CLI entry point"""
     terrafile = Terrafile(path)
-    terrafile.run()
+    try:
+        terrafile.run()
+    except Exception:  # pylint: disable=broad-except
+        sys.exit(1)
